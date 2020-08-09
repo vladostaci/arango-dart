@@ -1,27 +1,14 @@
 import 'package:arango/src/arango_connection.dart';
 import 'package:arango/src/collection/arango_collection.dart';
-import 'package:arango/src/collection/collection_status.dart';
-import 'package:arango/src/collection/collection_type.dart';
-import 'package:meta/meta.dart';
 
 class ArangoDocumentCollection extends ArangoCollection {
-  ArangoDocumentCollection({
-    @required String name,
-    @required ArangoConnection connection,
-    String id,
-    CollectionStatus status,
-    CollectionType type,
-    bool isSystem,
-    String globallyUniqueId,
-  }) : super(
-          name: name,
-          connection: connection,
-          id: id,
-          status: status,
-          type: type,
-          isSystem: isSystem,
-          globallyUniqueId: globallyUniqueId,
-        );
+  @override
+  final type = CollectionType.documentCollection;
+
+  final ArangoConnection _connection;
+
+  ArangoDocumentCollection(String name, this._connection)
+      : super(name, _connection);
 
   Future<Map<String, dynamic>> save(
     dynamic data, {
@@ -36,8 +23,8 @@ class ArangoDocumentCollection extends ArangoCollection {
       'collection': name,
     };
 
-    if (connection.arangoMajor <= 2) {
-      final resp = await connection.request(
+    if (_connection.arangoMajor <= 2) {
+      final resp = await _connection.request(
         method: 'POST',
         path: '/_api/document',
         body: data,
@@ -46,7 +33,7 @@ class ArangoDocumentCollection extends ArangoCollection {
       return resp.body;
     }
 
-    final resp = await connection.request(
+    final resp = await _connection.request(
       method: 'POST',
       path: '/_api/document/$name',
       body: data,
